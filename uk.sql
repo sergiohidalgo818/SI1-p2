@@ -56,8 +56,11 @@ order by mo.year desc;
 
 ----------
 -- peliculas relacionadas
-
-Select mo.movietitle, mo.year, mo.ratingmean from imdb_movies mo 
-where mo.movieid != ? and mo.movieid in(
-    Select mo.movieid 
-    )
+Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, mo.year, mo.ratingmean from imdb_movies mo 
+join imdb_moviegenres mg on mo.movieid = mg.movieid where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != 'Autumn Heart' 
+and ('Short' = mg.genre or 'Drama' = mg.genre) and mo.movieid in(
+    Select mo.movieid from imdb_movies mo 
+    join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid 
+    order by year desc limit 400) 
+group by title, mo.year, mo.ratingmean 
+order by year desc;
