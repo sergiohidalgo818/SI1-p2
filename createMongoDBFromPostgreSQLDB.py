@@ -68,7 +68,7 @@ def getImdb_UKtitle2actors():
 if __name__ == "__main__":
 
 
-    print('migrating.json')
+    print('migrating...')
     query = getImdb_UKtitle2actors()
     newUk = []
     for row in query:

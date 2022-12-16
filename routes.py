@@ -40,17 +40,16 @@ def topUK():
     movies2 = list()
 
     # TODO: consultas a MongoDB ...
-    if 'boton' in request.form:
-        query1 = list(database.getComedymongo(mycol))
+    query1 = list(database.getComedymongo(mycol))
 
-        query2 = list(database.getActionmongo(mycol))
+    query2 = list(database.getActionmongo(mycol))
 
-        query3 = list(database.get2Actors(mycol))
-
-
-        resul = database.getTest(mycol)
+    query3 = list(database.get2Actors(mycol))
 
 
-        movies = [query1, query2, query3]
+    resul = database.getTest(mycol)
+
+
+    movies = [query1, query2, query3]
 
     return render_template('topUK.html', movies=movies)
