@@ -31,20 +31,23 @@ def borraEstado():
     
 @app.route('/topUK', methods=['POST','GET'])
 def topUK():
-    client = database.getMongoClient()
+    client = database.mongo_client
     mycol = database.getMongoCollection(client)
-    movies=[[],[],[]]
+    movies=[]
     # TODO: consultas a MongoDB ...
     if 'boton' in request.form:
         if 'comedias' in request.form:
-            movies = database.getComedymongo(mycol)
+            movies = list(database.getComedymongo(mycol))
     
         if 'accion' in request.form:
-            movies = database.getActionmongo(mycol)
+            movies = list(database.getActionmongo(mycol))
             
     
         if 'darrenkatie' in request.form:
-            movies = database.get2Actors(mycol)
+            movies = list(database.get2Actors(mycol))
+
+        if 'test' in request.form:
+            movies= list(database.getTest(mycol))
 
 
     database.mongoDBCloseConnect(client)

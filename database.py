@@ -17,25 +17,31 @@ db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1",
 mongo_client = MongoClient()
 
 
-def getMongoCollection(mongoDB_client:MongoClient):
+def getMongoCollection(mongoDB_client):
     mongo_db = mongoDB_client.si1
     return mongo_db.topUK
 
+def getTest(mycol):
+    return mycol.find({
+        "$and": [{
+            "title": "Autumn Heart"
+        }
+        ]
+    })
 
-def getMongoClient():
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    return myclient
 
 def getComedymongo(mycol):
     return mycol.find({
         "$and": [{
             "year": {"$gte": 1990, "$lte": 1992}
         },
-            {
-            "genres": {"$regex": "Comedy"}
+        {
+            "genres": "Comedy"
         }
         ]
     })
+
+
 
 def getActionmongo(mycol):
     return mycol.find({
@@ -43,6 +49,9 @@ def getActionmongo(mycol):
         {
             "title": {"$regex": "The$"}
         }, 
+        {
+            "genres": "Action"
+        },
         {
             "year": {"$in": [1995, 1997, 1998]}
         }
