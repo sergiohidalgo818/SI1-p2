@@ -25,9 +25,8 @@ db = myclient['si1']
 collection = db['topUK'] 
 
 query = database.getTest(collection)
-print(query)
 for i in query:
-    print(i['title'])
+    print(i)
 
 database.mongoDBCloseConnect(myclient)
     

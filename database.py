@@ -22,12 +22,12 @@ def getMongoCollection(mongoDB_client):
     return mongo_db.topUK
 
 def getTest(mycol):
-    return mycol.find({
+    return (mycol.find({
         "$and": [{
             "title": "Autumn Heart"
         }
         ]
-    })
+    }))
 
 
 def getComedymongo(mycol):
