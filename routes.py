@@ -11,6 +11,7 @@ import time
 @app.route('/', methods=['POST','GET'])
 @app.route('/index', methods=['POST','GET'])
 def index():
+    
     return render_template('index.html')
 
 
@@ -30,6 +31,23 @@ def borraEstado():
     
 @app.route('/topUK', methods=['POST','GET'])
 def topUK():
-    # TODO: consultas a MongoDB ...
+    client = database.getMongoClient()
+    mycol = database.getMongoCollection(client)
     movies=[[],[],[]]
+    # TODO: consultas a MongoDB ...
+    if 'boton' in request.form:
+        if 'comedias' in request.form:
+            movies = database.getComedymongo(mycol)
+    
+        if 'accion' in request.form:
+            movies = database.getActionmongo(mycol)
+            
+    
+        if 'darrenkatie' in request.form:
+            movies = database.get2Actors(mycol)
+
+
+    database.mongoDBCloseConnect(client)
+            
+    
     return render_template('topUK.html', movies=movies)

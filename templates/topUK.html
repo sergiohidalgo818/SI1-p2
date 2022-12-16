@@ -1,0 +1,39 @@
+<!DOCTYPE HTML> 
+<!--
+ Ejemplo de MongoDB
+-->
+<HTML> 
+  <HEAD> 
+	  <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8"> 
+	  <TITLE>Ejemplo de MongoDB</TITLE>
+  </HEAD> 
+
+  <BODY>
+ 
+    <h2> Seleccione un botón para ver las películas</h2>
+
+    <h3>
+      <form action="" method="post">
+        <button name="boton" value="comedias"> Comedias(1990 - 1992)</button>
+        <button name="boton" value="accion"> Acción (1995, 1997 y 1998)</button>
+        <button name="boton" value="darrenkatie"> Darren McAree y Katie Lockett</button>
+      </form>
+    </h3>
+   
+    <h4>
+      <t0>Movie Title &nbsp&nbsp</t0><t0>&nbsp&nbsp Drama &nbsp&nbsp</t0><t0>&nbsp&nbsp Year &nbsp&nbsp</t0><t0>
+        &nbsp&nbsp Votes &nbsp&nbsp</t0><t0>&nbsp&nbsp Rating &nbsp&nbsp</t0><t0>&nbsp&nbsp Directors &nbsp&nbsp</t0>
+      <t0>&nbsp&nbsp Actors &nbsp&nbsp</t0><t0>&nbsp&nbsp Related Movies &nbsp&nbsp</t0>
+      {% for item in movies %}
+      <t1>{{ item.title}} &nbsp</t1> <t1>{% for genre in item.genres %} genre &nbsp {% endfor %}</t1>
+      <t1>{{ item.year}} &nbsp</t1> <t1>{{ item.number_of_votes}} &nbsp</t1><t1>{{ item.average_rating}} &nbsp</t1>
+      <t1>{% for director in item.directors %} director &nbsp {% endfor %}</t1> 
+      <t1>{% for actor in item.actors %} actor &nbsp {% endfor %}</t1>
+      <t1>{% for movie in item.related_movies  %} movie.title &nbsp movie.year &nbsp movie.average_rating &nbsp  {% endfor %}</t1>
+      {% endfor %}
+      <!-- TODO: tabla de películas Consulta 1 -->
+      <!-- TODO: tabla de películas Consulta 2 -->
+      <!-- TODO: tabla de películas Consulta 3 -->
+    </h4>
+  </BODY>
+</HTML>

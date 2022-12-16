@@ -63,4 +63,41 @@ and ('Short' = mg.genre or 'Drama' = mg.genre) and mo.movieid in(
     join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid 
     order by year desc limit 400) 
 group by title, mo.year, mo.ratingmean 
-order by year desc;
+order by year desc limit 10;
+
+
+---related movies
+
+Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, mo.year, mo.ratingmean, STRING_AGG(mg.genre, ', ') as genres
+from imdb_moviegenres mg join imdb_movies mo on mg.movieid = mo.movieid where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != 'Autumn Heart' 
+and mo.movieid in(
+    Select mo.movieid from imdb_movies mo 
+    join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid 
+    order by year desc limit 400) 
+	and 'Romance' in (
+	
+	Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, STRING_AGG(mg.genre, ', ') as genres 
+from imdb_moviegenres mg join imdb_movies mo on mg.movieid = mo.movieid 
+where mg.movieid  in (
+    Select mo.movieid from imdb_movies mo 
+    join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid 
+    order by year desc limit 400) 
+group by title, mo.year
+order by mo.year desc, title desc
+
+
+)
+group by title, mo.year, mo.ratingmean 
+order by year desc limit 10;
+
+
+
+Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, 
+mo.year, mo.ratingcount, STRING_AGG(mg.genre, ', ') as genres
+from imdb_moviegenres mg join imdb_movies mo on mg.movieid = mo.movieid 
+where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != %s  and mg.movieid in (
+    Select mo.movieid from imdb_movies mo 
+    join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid 
+    order by year desc limit 400) 
+group by title, mo.year, mo.ratingcount
+order by mo.year desc

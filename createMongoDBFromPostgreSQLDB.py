@@ -9,8 +9,9 @@ import json
 import collections
 import pymongo
 from pymongo import MongoClient
-
+import math
 import datetime
+import database
 
 # configurar el motor de sqlalchemy
 db_engine = create_engine("postgresql://alumnodb:alumnodb@localhost/si1", echo=False)
@@ -24,31 +25,11 @@ def getImdb_UKrelatedmovies(title, genres):
     try:
         db_conn = None
         db_conn = db_engine.connect()
-        query = str("Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, mo.year, mo.ratingmean from imdb_movies mo ")
+
+        query = str("Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, mo.year, mo.ratingcount, STRING_AGG(mg.genre, ', ') as genres from imdb_moviegenres mg join imdb_movies mo on mg.movieid = mo.movieid where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != %s  and mg.movieid in ( Select mo.movieid from imdb_movies mo join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid order by year desc limit 400) group by title, mo.year, mo.ratingcount order by mo.year desc")
             
-        query= query + "join imdb_moviegenres mg on mo.movieid = mg.movieid where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != '" + str(title) + "' and ("
-        
-        if (len(genres) == 1): 
+        db_result = db_conn.execute(query, title)
 
-            query = query + " '" + str(list(genres).pop) + "' = mg.genre) and mo.movieid in ("
-           
-            query = query + "Select mo.movieid from imdb_movies mo join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid order by year desc limit 400) "
-            
-            query = query + "group by title, mo.year, mo.ratingmean order by year desc;"
-            db_result = db_conn.execute(query)
-
-
-            return db_result.fetchall()
-
-        for i in genres:
-            query = query + i + " = mg genre"
-            break
-
-        query = query + ") and mo.movieid in( "
-        query = query + "Select mo.movieid from imdb_movies mo join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid order by year desc limit 400) "
-        query = query + "group by title, mo.year, mo.ratingmean order by year desc;"
-         
-        db_result = db_conn.execute("Select replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') as title, mo.year, mo.ratingmean from imdb_movies mo join imdb_moviegenres mg on mo.movieid = mg.movieid where replace(substring(mo.movietitle,1, length(mo.movietitle) - 7), '(', '') != 'Autumn Heart' and ('Short' = mg.genre or 'Drama' = mg.genre) and mo.movieid in( Select mo.movieid from imdb_movies mo join imdb_moviecountries im ON im.country='UK' and im.movieid = mo.movieid order by year desc limit 400) group by title, mo.year, mo.ratingmean order by year desc;")
 
         return db_result.fetchall()
     except:
@@ -92,31 +73,73 @@ if __name__ == "__main__":
     newUk = []
     for row in query:
         d = dict()
-        d['title'] = row[0]
+        d['title'] = str(row[0])
 
         d['genres'] = [str(row[1])]
         d['genres']= str(d['genres']).replace("'", "")
         d['genres']= str(d['genres']).replace("\\", "")
         d['genres'] = ast.literal_eval(d['genres'])
         
-        d['year'] = row[2]
+        d['year'] = int(row[2])
         d['number_of_votes'] = row[3]
         d['average_rating'] = row[4]
         d['directors'] = [str(row[5])]
         d['directors']= str(d['directors']).replace("'", "")
         d['directors']= str(d['directors']).replace("\\", "")
         d['directors'] = ast.literal_eval(d['directors'])
+
         d['actors'] = [str(row[6])]
         d['actors']= str(d['actors']).replace("'", "")
         d['actors']= str(d['actors']).replace("\\", "")
         d['actors'] = ast.literal_eval(d['actors'])
 
 
-        getImdb_UKrelatedmovies(d['title'], d['genres'])
-        
-        newUk.append(d)
+        query2 = getImdb_UKrelatedmovies(d['title'], d['genres'])
 
         
+        related = list()
+        i=0
+        for row2 in query2:
+            if(i==10):
+                break
+            
+            
+                
+            j = len(d['genres'])
+            points = 0
+            while(j>0):
+                j-=1
+                if(str(d['genres'][-1]) in str(row2[3])):
+                    points+=1
+
+
+                if(points >= math.ceil(len(d['genres'])/2)):
+
+                    x = dict()
+                    x['title'] = row2[0]
+                    x['year'] = int(row2[1])
+                    x['average_rating'] = row2[2]
+                    related.append(x)
+                    i+=1
+                    break
+
+        d['related_movies'] =[related]
+        newUk.append(d)
+                
     with open('mongojs/title2actors.json', 'w') as f:
         f.write(json.dumps(newUk, indent = 5))
    
+    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+
+    if 'si1' in myclient.list_database_names():
+        myclient.drop_database('si1')
+
+    mydb = myclient["si1"]
+    
+    mycol = mydb["topUk"]
+    mycol.insert_many(newUk)
+
+    database.mongoDBCloseConnect(myclient)
+
+
+    
