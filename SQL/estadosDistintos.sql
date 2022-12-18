@@ -47,7 +47,7 @@ ON orders (extract (year from orderdate));
    
 --4.2 - Eliminación y creación / creación de un índice del país
 DROP INDEX IF EXISTS icustomers;
-CREATE index icustomers ON customers (country);
+CREATE index icustomers ON customers (country); 
 
 --4.3 - Plan de ejecución índice del país
 explain analyze (Select c.customerid, extract (year from o.orderdate) as cyear, count(distinct(c.state)) as diferent_states 
